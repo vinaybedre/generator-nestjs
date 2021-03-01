@@ -1,0 +1,23 @@
+{{#isEnum}}
+    {{#allowableValues}}
+        if({{#values}}{{paramName}} !== "{{.}}"{{^-last}} && {{/-last}} {{/values}}) {
+            throw new BadRequestException("{{paramName}} should be one of {{#values}}{{.}}{{^-last}}, {{/-last}}{{/values}}");
+        }
+    {{/allowableValues}}
+{{/isEnum}}
+{{^isEnum}}{{^isString}}
+    if(!is{{#lambda.titlecase}}{{dataType}}{{/lambda.titlecase}}({{paramName}})) {
+        throw new BadRequestException("{{paramName}} should be of type {{dataType}}. Provided " + {{paramName}});
+    }
+{{/isString}}{{/isEnum}}
+
+{{#minimum}}
+if(!min({{paramName}}, {{.}})) {
+    throw new BadRequestException("{{paramName}} should have minimum value of " + {{.}});
+}
+{{/minimum}}
+{{#maximum}}
+if(!max({{paramName}}, {{.}})) {
+    throw new BadRequestException("{{paramName}} should have maximum value of " + {{.}});
+}
+{{/maximum}}

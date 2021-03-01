@@ -1,0 +1,38 @@
+import { Controller, Get, Put, Post, Delete, Body, Param, Query, BadRequestException, Req } from '@nestjs/common';
+{{#imports}}import { {{classname}} } from '../model/{{classname}}';
+{{/imports}}
+import { isNumber, isBoolean, isDefined } from 'class-validator'
+import { Request } from 'express';
+@Controller()
+export class {{classname}}Controller {
+    constructor(private readonly {{#lambda.camelcase}}{{classname}}{{/lambda.camelcase}}Handler: {{classname}}Handler) { }
+{{#operations}}
+    {{#operation}}
+    @{{httpMethod}}('{{path}}')
+    {{operationId}}({{#allParams}}{{>operationParam}}, {{/allParams}}@Req() request: Request): Promise<{{{returnType}}}> {
+        {{#allParams}}
+        {{^required}}
+        if(isDefined({{paramName}})) {
+        {{>apiCheck}}
+        }
+        {{/required}}
+        {{#required}}
+        {{#isPrimitiveType}}
+        {{>apiCheck}}
+        {{/isPrimitiveType}}
+        {{/required}}
+        {{/allParams}}
+        return this.{{#lambda.camelcase}}{{classname}}{{/lambda.camelcase}}Handler.{{operationId}}({{#allParams}}{{paramName}}, {{/allParams}}request)
+    }
+
+    {{/operation}}
+{{/operations}}
+}
+
+export interface {{classname}} {
+{{#operations}}
+{{#operation}}
+    {{operationId}}({{#allParams}}{{paramName}}{{^required}}?{{/required}}: {{^isEnum}}{{{dataType}}}{{/isEnum}}{{#isEnum}}{{#allowableValues}}{{#values}}"{{.}}"{{^-last}} |{{/-last}} {{/values}}{{/allowableValues}}{{/isEnum}}{{/allParams}}, request?: Request): Promise<{{{returnType}}}>;
+{{/operation}}
+{{/operations}}
+}
